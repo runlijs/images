@@ -5,12 +5,26 @@ var date = new Date()
 var year = date.getFullYear()
 var month = date.getMonth()+1
 var imageFolder = [year,month]
+var imageDomain = 'https://raw.githubusercontent.com/runlijs/images/master/'+imageFolder.join('')
 
 var imageFolderPath = [__dirname,imageFolder.join('')]
 imageFolderPath = imageFolderPath.join('/')
 var args = process.argv
 
 var urls = []
+
+function getType(url){
+  url = url.split('?')[0]
+  var urlArr = url.split('/')
+  var last = urlArr[urlArr.length-1]
+  var index = last.indexOf('.')
+  var type = 'jpeg'
+  if(index>-1){
+    type = last.substr(index+1,last.length)
+  }
+  return type
+}
+// https://raw.githubusercontent.com/runlijs/images/master/20172/201721487060054288.jpeg
 function getImages(url){
   fs.exists(imageFolderPath,function(bl){
     if(!bl){
@@ -18,7 +32,8 @@ function getImages(url){
         getImages(url)
       })
     }else{
-      var fileName = imageFolderPath+'/'+imageFolder.join('')+Date.now()+'.jpeg'
+      var fileName = imageFolder.join('')+Date.now()+'.'+getType(url)
+      var filePath = imageFolderPath+'/'+fileName
       http.get(url,function(res){
         var image = ''
         res.setEncoding('binary')
@@ -26,13 +41,14 @@ function getImages(url){
           image += chunk
         })
         res.on('end',function(){
-          fs.writeFile(fileName,image,'binary',function(err){
+          fs.writeFile(filePath,image,'binary',function(err){
             if(!err) {
               if(urls.length){
                 console.log('共'+urls.length+'张图片')
                 getImages(urls.shift())
               }
               console.log('保存成功')
+              console.log('访问地址',imageDomain+'/'+fileName)
             }
           })
         })
@@ -49,5 +65,6 @@ if(args.length>2){
   if(urls.length){
     console.log('共'+urls.length+'张图片')
     getImages(urls.shift())
+    // getType(urls.shift())
   }
 }
