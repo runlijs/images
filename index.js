@@ -6,25 +6,48 @@ var year = date.getFullYear()
 var month = date.getMonth()+1
 var imageFolder = [year,month]
 
-console.log(__dirname)
+var imageFolderPath = [__dirname,imageFolder.join('')]
+imageFolderPath = imageFolderPath.join('/')
 var args = process.argv
-// console.log(process)
-// console.log(args)
 
 var urls = []
 function getImages(url){
-  // fs.exists()
-  http.get(url,function(res){
-    var image = ''
-    res.setEncoding('binary')
-
+  fs.exists(imageFolderPath,function(bl){
+    if(!bl){
+      fs.mkdir(imageFolderPath,function(err){
+        getImages(url)
+      })
+    }else{
+      var fileName = imageFolderPath+'/'+imageFolder.join('')+Date.now()+'.jpeg'
+      http.get(url,function(res){
+        var image = ''
+        res.setEncoding('binary')
+        res.on('data',function(chunk){
+          image += chunk
+        })
+        res.on('end',function(){
+          fs.writeFile(fileName,image,'binary',function(err){
+            if(!err) {
+              if(urls.length){
+                console.log('共'+urls.length+'张图片')
+                getImages(urls.shift())
+              }
+              console.log('保存成功')
+            }
+          })
+        })
+      })
+    }
   })
+  
 }
 
 if(args.length>2){
   for(var i=2;i<args.length;i++){
     urls.push(args[i])
   }
-  // console.log(urls)
-  if(urls.length)getImages(urls.shift())
+  if(urls.length){
+    console.log('共'+urls.length+'张图片')
+    getImages(urls.shift())
+  }
 }
