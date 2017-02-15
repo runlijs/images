@@ -1,0 +1,7 @@
+{
+  "name": "images",
+  "version": "0.0.1",
+  "devDependencies": {
+    "request": "^2.79.0"
+  }
+}
