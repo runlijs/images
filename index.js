@@ -7,6 +7,7 @@ var year = date.getFullYear()
 var month = date.getMonth()+1
 var day  = date.getDate()
 var imageFolder = [year,month,day]
+var imageFolder = [year,month]
 var imageDomain = 'https://raw.githubusercontent.com/runlijs/images/master/'+imageFolder.join('')
 
 var imageFolderPath = [__dirname,imageFolder.join('')]
@@ -36,6 +37,7 @@ function getImages(url){
     }else{
       var fileName = imageFolder.join('')+Date.now()+'.'+getType(url)
       var filePath = imageFolderPath+'/'+fileName
+// <<<<<<< HEAD
       request.head(url, function(err, res, body){
         // console.log('content-type:', res.headers['content-type']);
         // console.log('content-length:', res.headers['content-length']);
@@ -68,6 +70,27 @@ function getImages(url){
       //     })
       //   })
       // })
+=======
+      http.get(url,function(res){
+        var image = ''
+        res.setEncoding('binary')
+        res.on('data',function(chunk){
+          image += chunk
+        })
+        res.on('end',function(){
+          fs.writeFile(filePath,image,'binary',function(err){
+            if(!err) {
+              if(urls.length){
+                console.log('共'+urls.length+'张图片')
+                getImages(urls.shift())
+              }
+              console.log('保存成功')
+              console.log('访问地址',imageDomain+'/'+fileName)
+            }
+          })
+        })
+      })
+>>>>>>> f58f32d63729bab0f78c8e8688f5ce26aed7aa9e
     }
   })
   
